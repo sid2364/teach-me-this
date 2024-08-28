@@ -16,6 +16,7 @@ from langchain_community.vectorstores import LanceDB
 HF_TOKEN = "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"
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = HF_TOKEN
 
+# url_loader = WebBaseLoader("https://gameofthrones.fandom.com/wiki/Jon_Snow")
 #documents_loader = DirectoryLoader('data', glob="./*.pdf", loader_cls=PyPDFLoader)
 pdf_files = glob.glob('data/*.pdf')
 print("Loading documents: ", pdf_files)
@@ -30,6 +31,7 @@ for file_path in tqdm(pdf_files, desc="Reading books"):
 #data_docs = documents_loader.load()
 
 docs = all_docs
+
 
 
 def clean_text(text):
@@ -83,24 +85,33 @@ table = db.create_table(
     mode="overwrite",
 )
 
-docsearch = LanceDB.from_documents(all_chunks, embeddings, connection=table)
+docsearch = LanceDB.from_documents(all_chunks, embeddings, connection=db)
 
+from langchain.prompts.prompt import PromptTemplate
+from langchain.schema.messages import get_buffer_string
 from langchain_core.prompts import ChatPromptTemplate
 
-template = """
-{query}
+prompt_template = """
+You are a helpful AI assistant. Your name is Jarvis
+
+Use the following information fetched from the PDF provided by the user to answer the question:
+{context}
+
+Question: {query}
+Answer:
 """
 
-prompt = ChatPromptTemplate.from_template(template)
+prompt = PromptTemplate(
+    input_variables=["context", "query"],
+    template=prompt_template
+)
 
-messages = chat_template.format_messages(name="Sid", user_input="What is your name?")
-
-my_query = "What is the name of the pony that Sam Gamgee acquires in Bree after Bill Ferny sells them Bill the Pony?"
+#my_query = "What is the name of the pony that Sam Gamgee acquires in Bree after Bill Ferny sells them Bill the Pony?"
+my_query = "What did Eärendil say to Elwing before he went up alone into the land and came into the Calacirya?"
 
 retriever = docsearch.as_retriever(search_kwargs={"k": 3})
 docs = retriever.get_relevant_documents(my_query)
 print(docs)
-
 from langchain_community.llms import HuggingFaceHub
 
 # Model architecture
@@ -109,15 +120,25 @@ model_kwargs = {"temperature": 0.5, "max_length": 4096, "max_new_tokens": 2048}
 model = HuggingFaceHub(repo_id=llm_repo_id, model_kwargs=model_kwargs)
 
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
+# from langchain_core.runnables import RunnablePassthrough
+
+# rag_chain = (
+#         {"context": retriever,  "query": RunnablePassthrough()}
+#         | prompt
+#         | model
+#         | StrOutputParser()
+# )
 
 rag_chain = (
-        {"context": retriever,  "query": RunnablePassthrough()}
-        | prompt
-        | model
-        | StrOutputParser()
+        retriever  # Get relevant documents
+        | (lambda docs: {"context": "\n".join([doc.page_content for doc in docs]), "query": my_query})  # Combine context and query
+        | prompt  # Format the prompt with the context and query
+        | model  # Get the model response
+        | StrOutputParser()  # Parse the model response
 )
+
+print(retriever)
+print(rag_chain)
 response = rag_chain.invoke(my_query)
-
-
+print("-"*20)
 print(response)
