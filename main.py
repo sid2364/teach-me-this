@@ -3,7 +3,6 @@ from langchain_community.document_loaders import WebBaseLoader, PyPDFLoader, Dir
 
 import re
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.docstore.document import Document
 import glob
 
 from tqdm import tqdm
@@ -16,8 +15,16 @@ from langchain_community.vectorstores import LanceDB
 HF_TOKEN = "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"
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = HF_TOKEN
 
-# url_loader = WebBaseLoader("https://gameofthrones.fandom.com/wiki/Jon_Snow")
-#documents_loader = DirectoryLoader('data', glob="./*.pdf", loader_cls=PyPDFLoader)
+embedding_model_name = 'sentence-transformers/all-MiniLM-L6-v2'
+model_name = "sentence-transformers/all-MiniLM-L6-v2"
+model_kwargs = {'device': 'cpu'}
+encode_kwargs = {'normalize_embeddings': False}
+embeddings = HuggingFaceEmbeddings(
+    model_name=model_name,
+    model_kwargs=model_kwargs,
+    encode_kwargs=encode_kwargs
+)
+
 pdf_files = glob.glob('data/*.pdf')
 print("Loading documents: ", pdf_files)
 all_docs = []
@@ -28,11 +35,7 @@ for file_path in tqdm(pdf_files, desc="Reading books"):
     docs = loader.load()
     all_docs.extend(docs)
 
-#data_docs = documents_loader.load()
-
 docs = all_docs
-
-
 
 def clean_text(text):
     # Replace multiple newlines or special characters with a space
@@ -42,7 +45,6 @@ def clean_text(text):
     # Normalize spaces (replace multiple spaces with a single space)
     cleaned = re.sub(r'\s+', ' ', cleaned).strip()
     return cleaned
-
 
 for doc in docs:
     doc.page_content = clean_text(doc.page_content)
@@ -57,20 +59,8 @@ for doc in tqdm(docs, desc="Splitting documents"):
 for i, chunk in enumerate(all_chunks[100:102]):
     print(f"Chunk {i + 1}:\n{chunk.page_content}\n")
 
-
-embedding_model_name = 'sentence-transformers/all-MiniLM-L6-v2'
-model_name = "sentence-transformers/all-MiniLM-L6-v2"
-model_kwargs = {'device': 'cpu'}
-encode_kwargs = {'normalize_embeddings': False}
-embeddings = HuggingFaceEmbeddings(
-    model_name=model_name,
-    model_kwargs=model_kwargs,
-    encode_kwargs=encode_kwargs
-)
-
-query = "Hello I want to see the length of the embeddings for this document."
+query = "Tell me the length of the embeddings for this document"
 print(len(embeddings.embed_documents([query])[0]))
-
 
 db = lancedb.connect("lance_database")
 table = db.create_table(
