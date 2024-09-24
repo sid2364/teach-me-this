@@ -12,6 +12,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 import lancedb
 from langchain_community.vectorstores import LanceDB
 
+from utils import create_new_db_or_read_existing
+
 HF_TOKEN = "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"
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = HF_TOKEN
 
@@ -76,6 +78,7 @@ table = db.create_table(
 )
 
 docsearch = LanceDB.from_documents(all_chunks, embeddings, connection=db)
+# todo call create_new_db_or_read_existing here instead
 
 from langchain.prompts.prompt import PromptTemplate
 from langchain.schema.messages import get_buffer_string

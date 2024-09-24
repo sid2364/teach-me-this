@@ -26,7 +26,10 @@ def create_new_db_or_read_existing():
     return write_new_lancedb()
 
 def read_lancedb():
-    pass #todo
+    #todo check if this works
+    db = lancedb.connect("lance_database")
+    docsearch = db.open_table("rag_tmt")
+    return docsearch
 
 def write_new_lancedb():
     for file_path in tqdm(files_to_read, desc="Reading books"):
@@ -76,6 +79,7 @@ def write_new_lancedb():
     )
 
     docsearch = LanceDB.from_documents(all_chunks, embeddings, connection=db)
+    return docsearch
 
 
 '''
