@@ -9,15 +9,15 @@ HF_TOKEN = "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"
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = HF_TOKEN
 
 docsearch = create_new_db_or_read_existing()
-print("Got lancedb instance from utils: ", docsearch)
+print("Got LanceDB instance from utils: ", docsearch)
 
 prompt_template = """
 You are a helpful AI assistant. Your name is Jarvis
 
-Use the following information fetched from the PDF provided by the user to answer the question:
+Use the following information fetched from the PDF files provided by the user to answer the question:
 {context}
 
-Question: {query}
+User's question: {query}
 Answer:
 """
 

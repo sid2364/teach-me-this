@@ -10,8 +10,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import WebBaseLoader, PyPDFLoader, DirectoryLoader
 from langchain_huggingface import HuggingFaceEmbeddings
 
-
-# Output file where you'll store the names
+# output file where we'll store the names
 output_file = 'saved_file_names.txt'
 data_dir = 'data'
 files_to_read = glob.glob('data/*.pdf')
@@ -31,7 +30,7 @@ embeddings = HuggingFaceEmbeddings(
 #todo try OpenAIEmbeddings() instead of HuggingFaceEmbeddings
 
 def create_new_db_or_read_existing():
-    # List files and write their names to a file
+    # check if files in data are the ones we read before, if so return that instance (not foolproof!)
     if os.path.exists(output_file):
         with open(output_file, 'r') as file:
             saved_file_names = file.readlines()
