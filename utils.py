@@ -1,7 +1,14 @@
+import os
+import re
 from tqdm import tqdm
 import glob
+
+import lancedb
+
+from langchain_community.vectorstores import LanceDB
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import WebBaseLoader, PyPDFLoader, DirectoryLoader
+from langchain_huggingface import HuggingFaceEmbeddings
 
 
 # Output file where you'll store the names
@@ -9,29 +16,43 @@ output_file = 'saved_file_names.txt'
 data_dir = 'data'
 files_to_read = glob.glob('data/*.pdf')
 
+lancedb_name = "lance_database"
+
+embedding_model_name = 'sentence-transformers/all-MiniLM-L6-v2'
+model_name = "sentence-transformers/all-MiniLM-L6-v2"
+model_kwargs = {'device': 'cpu'}
+encode_kwargs = {'normalize_embeddings': False}
+
+embeddings = HuggingFaceEmbeddings(
+    model_name=model_name,
+    model_kwargs=model_kwargs,
+    encode_kwargs=encode_kwargs
+)
+#todo try OpenAIEmbeddings() instead of HuggingFaceEmbeddings
+
 def create_new_db_or_read_existing():
     # List files and write their names to a file
-    with open(output_file, 'r') as file:
-        saves_file_names = file.readlines()
-        saved_file_names = [name.strip() for name in file_names]
+    if os.path.exists(output_file):
+        with open(output_file, 'r') as file:
+            saved_file_names = file.readlines()
+            saved_file_names = [name.strip() for name in saved_file_names]
 
-    if set(saved_file_names) == set(files_to_read):
-        return read_lancedb()
+        if set(saved_file_names) == set(files_to_read):
+            return read_lancedb()
 
     #else write a new lancedb since we don't have these new books stored and return that instance (will take longer)
-
+    docsearch = write_new_lancedb()
     with open(output_file, 'w') as file:
         for filename in files_to_read:
             file.write(f"{filename}\n")
-    return write_new_lancedb()
-
-def read_lancedb():
-    #todo check if this works
-    db = lancedb.connect("lance_database")
-    docsearch = db.open_table("rag_tmt")
     return docsearch
 
+def read_lancedb():
+    db = lancedb.connect(lancedb_name)
+    return LanceDB(connection=db, embedding=embeddings)
+
 def write_new_lancedb():
+    all_docs = []
     for file_path in tqdm(files_to_read, desc="Reading books"):
         # Load each document using PyPDFLoader
         loader = PyPDFLoader(file_path)
@@ -41,11 +62,8 @@ def write_new_lancedb():
     docs = all_docs
 
     def clean_text(text):
-        # Replace multiple newlines or special characters with a space
         cleaned = re.sub(r'\n+', ' ', text)
-        # Remove any other special characters (optional)
         cleaned = re.sub(r'[_\n]', ' ', cleaned)
-        # Normalize spaces (replace multiple spaces with a single space)
         cleaned = re.sub(r'\s+', ' ', cleaned).strip()
         return cleaned
 
@@ -65,23 +83,7 @@ def write_new_lancedb():
     query = "Tell me the length of the embeddings for this document"
     print(len(embeddings.embed_documents([query])[0]))
 
-    db = lancedb.connect("lance_database")
-    table = db.create_table(
-        "rag_tmt",
-        data=[
-            {
-                "vector": embeddings.embed_query("Hello Computer"),
-                "text": "Hello computer!",
-                "id": "1",
-            }
-        ],
-        mode="overwrite",
-    )
+    db = lancedb.connect(lancedb_name)
 
     docsearch = LanceDB.from_documents(all_chunks, embeddings, connection=db)
     return docsearch
-
-
-'''
-todo
-write these functions and make the main.py usethem instead'''
