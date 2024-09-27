@@ -34,6 +34,10 @@ def get_books_we_read():
 
 def create_new_db_or_read_existing():
     # check if files in data are the ones we read before, if so return that instance (not foolproof!)
+    if not files_to_read:
+        print("No books to read :((")
+        exit()
+
     if os.path.exists(output_file):
         with open(output_file, 'r') as file:
             saved_file_names = file.readlines()
