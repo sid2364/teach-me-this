@@ -60,7 +60,7 @@ def main():
     docsearch = create_new_db_or_read_existing()
     # print("Got LanceDB instance from utils: ", docsearch)
 
-    retriever = docsearch.as_retriever(search_kwargs={"k": 5})
+    retriever = docsearch.as_retriever(search_kwargs={"k": 8})
     # my_query = "What is the name of the pony that Sam Gamgee acquires in Bree after Bill Ferny sells them Bill the Pony?"
     my_query = "What did Eärendil say to Elwing before he went up alone into the land and came into the Calacirya?"
 
@@ -88,16 +88,18 @@ def main():
 
         response, fetched_data = chatbot.ask_question(user_input)
 
-        user_input_know = input(
-            "Would you like to know how I know? [y|n] "
-        )  # cheeky, maybe remove this later
+        '''
+        user_input_know = input("Would you like to know how I know? [y|n] ") # cheeky, maybe remove this later
         if user_input_know.lower() in ["y", "yes"]:
             print(f"Fetched Data:-\n{fetched_data}")
             print(f"\nJarvis: {response}")
         else:
             print(f"\nJarvis: {response}")
+        '''
+        print(f"\nJarvis: {response}")
 
         print("-" * 20)
+
 
 
 if __name__ == "__main__":
