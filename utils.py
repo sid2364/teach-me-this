@@ -29,6 +29,9 @@ embeddings = HuggingFaceEmbeddings(
 )
 #todo try OpenAIEmbeddings() instead of HuggingFaceEmbeddings
 
+def get_books_we_read():
+    return files_to_read
+
 def create_new_db_or_read_existing():
     # check if files in data are the ones we read before, if so return that instance (not foolproof!)
     if os.path.exists(output_file):
@@ -79,7 +82,7 @@ def write_new_lancedb():
     for i, chunk in enumerate(all_chunks[100:102]):
         print(f"Chunk {i + 1}:\n{chunk.page_content}\n")
 
-    query = "Tell me the length of the embeddings for this document"
+    query = "Tell me the length of the embeddings for this document" #for kicks
     print(len(embeddings.embed_documents([query])[0]))
 
     db = lancedb.connect(lancedb_name)
