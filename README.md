@@ -27,19 +27,58 @@ pip3 install lancedb langchain langchain_community prettytable sentence-transfor
 python main.py
 ```
 
-## Sample output
+## An academic example
+When passed a whitepaper about rent division with picky roommates (credit: https://arxiv.org/pdf/2409.14600 for the brilliant source material), and cross-examined, this is the output:
+```commandline
+env) sid@wolfpack:~/Study/teach-me-this$ python3 main.py 
+USER_AGENT environment variable not set, consider setting it to identify your requests.
+/home/sid/Study/teach-me-this/env/lib/python3.12/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+Firing things up... This may take a minute (or three)
+Reading books: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00,  2.74it/s]
+Splitting documents: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 37/37 [00:00<00:00, 3903.25it/s]
+Chunk 1:
+0(e log d time), 1999. [5] Marek Cygan. Improved approximation for 3-dimensional matching via bounded pathwidth local search. In2013 IEEE 54th Annual Symposium on Foundations of Computer Science , pages 509–518, 2013. doi:10.1109/FOCS.2013.61. [6] Ya’akov Gal, Moshe Mash, Ariel D Procaccia, and Yair Zick. Which is the fairest (rent division) of them all? In Proceedings of the 2016 ACM Conference on Economics and Computation , pages 67–84, 2016. [7] Ashish Goel, Michael Kapralov, and Sanjeev Khanna. Perfect matchings in o(nlogn)time in regular bipartite graphs, 2010. [8] Martin Grotschel, Laszlo Lovasz, and Alexander Schrijver. Geometric algorithms and combinatorial optimiza- tion. Springer, 1993. [9] Harold W. Kuhn. The hungarian method for the assignment problem. Naval Research Logistics Quarterly , 1956. [10] Dominik Peters, Ariel D. Procaccia, and David Zhu. Robust rent division. In Alice H. Oh, Alekh Agarwal, Danielle Belgrave, and Kyunghyun Cho, editors, Advances in Neural
+
+Chunk 2:
+and Kyunghyun Cho, editors, Advances in Neural Information Processing Systems , 2022. URL https://openreview.net/forum?id=eRBVi61Vct1 . [11] Ariel Procaccia, Rodrigo Velez, and Dingli Yu. Fair rent division on a budget. Proceedings of the AAAI Conference on Artificial Intelligence , 32(1), 2018. ISSN 2374-3468. doi:10.1609/aaai.v32i1.11465. URL https://ojs.aaai.org/index.php/AAAI/article/view/11465 . Number: 1. [12] Ariel D. Procaccia, Benjamin Schiffer, and Shirley Zhang. Multi-apartment rent division, 2024. [13] Rodrigo A. Velez. Equitable rent division. ACM Trans. Econ. Comput. , 6(2), 2018. ISSN 2167-8375. doi:10.1145/3274528. URL https://dl.acm.org/doi/10.1145/3274528 . 14
+
+384
+The token has not been saved to the git credentials helper. Pass `add_to_git_credential=True` in this function directly or `--add-to-git-credential` if using via `huggingface-cli` if you want to set the git credential as well.
+Token is valid (permission: read).
+Your token has been saved to /home/sid/.cache/huggingface/token
+Login successful
+
+
+
+Ask me anything about the books you asked me to read: data/2409.16579v1.pdfdata/2409.14600v1.pdf!
+(type 'exit' to end conversation)
+
+You: What is the rent game about?
+
+Jarvis: 
+The rent game is a problem in computer science and economics that deals with dividing rent among tenants in a fair and efficient manner. In this context, fairness is defined as ensuring that every given participant prefers his or her assignment over that of everyone else, which is called envy-freeness. This paper explores how to account for room and roommate preferences when rent division is extended to include roommates, which is a consideration that requires new analysis. The authors present novel algorithmic approaches to find the maximum social welfare assignment and produce prices that minimize tenant envy to ensure fairness. The problem is not straightforward as previous research tools no longer apply directly to the setting with roommates. The authors provide a guarantee of roommate envy-freeness and present an integer program to minimize envy among tenants. The existence of a person envy-free price vector for the max-welfare assignment is not guaranteed, as shown in a counterexample.
+--------------------
+
+You: What happens when a person wants to pay more for a room? How do you ensure fairness?
+
+Jarvis: In the context of the roommate rent division problem, if a person wants to pay more for a room, it is possible to ensure fairness by implementing a price vector that minimizes tenant envy. This can be achieved by using the ε-EF (ε-envy-freeness) fairness concept, which ensures that one's utility for rooming with someone else is at most ε times what they currently receive given the max welfare assignment. To achieve this, we present constructions with both equal and unequal splitting of rent among roommates, alongside the general option. The proposed algorithms and fairness guarantees are tested in numerical results, and the results show that the proposed approaches are promising solutions that balance fairness and efficiency.
+--------------------
+
+You: Is it a zero-sum game?
+
+Jarvis: 
+Hedonic games, including the ones introduced in this paper, are not necessarily zero-sum games. In hedonic games, agents have their own preferences over coalitions, and their utility is determined by the coalition they belong to, not necessarily by the coalition they are not a part of. Therefore, the utility of one agent does not necessarily correspond to the loss of another agent.
+--------------------
+
+```
+Still need to keep up with the changes in the HuggingFace libraries to remove wanrings, but so far so good!
+
+
+## A less academic example
 This is when data/ is added with the Silmarillion by JRR Tolkien
 ```text
-You are a helpful AI assistant. Your name is Jarvis
-
-Use the following information fetched from the PDF provided by the user to answer the question:
-of their voyage, and were taken from them for ever. Then Eärendil said to Elwing: 'Await me here; for one only may bring the message that it is my fate to bear.' And he went up alone into the land, and came into the Calacirya, and it seemed to him empty and silent; for even as Morgoth and Ungoliant came in ages past, so now Eärendil had come at a time of festival, and wellnigh all the Elvenfolk were gone to Valimar, or were gathered in the halls of
-of the ships of song; golden were its oars and white its timbers, hewn in the birchwoods of Nimbrethil, and its sails were as the argent moon. In the Lay of Eärendil is many a thing sung of his adventures in the deep and in lands untrodden, and in many seas and in many isles; but Elwing was not with him, and she sat in sorrow by the mouths of Sirion. Eärendil found not Tuor nor Idril, nor came he ever on that journey to the shores of Valinor, defeated by shadows and enchantment, driven by repelling winds, until in longing for Elwing he turned homeward towards the coast of Beleriand. And his heart bade him haste, for a sudden fear had fallen on him out of dreams; and the winds that before he had striven with might not now bear him back as swift as his desire. Now when first the tidings came to Maedhros that Elwing yet lived, and dwelt in possession of the Silmaril by the mouths of Sirion, he repenting of the deeds in Doriath withheld his hand. But in time the knowledge of their oath
-the Teleri saw the coming of that ship out of the East and they were amazed, gazing from afar upon the light of the Silmaril, and it was very great. Then Eärendil, first of living Men, landed on the immortal shores; and he spoke there to Elwing and to those that were with him, and they were three mariners who had sailed all the seas besides him: Falathar, Erellont, and Aerandir were their names. And Eärendil said to them: 'Here none but myself shall set foot, lest you fall under the wrath of the Valar. But that peril I will take on myself alone, for the sake of the Two Kindreds.' But Elwing answered: 'Then would our paths be sundered for ever; but all thy perils I will take on myself also.' And she leaped into the white foam and ran towards him; but Eärendil was sorrowful, for he feared the anger of the Lords of the West upon any of Middle-earth that should dare to pass the leaguer of Aman. And there they bade farewell to the companions of their voyage, and were taken from them for
-
-Question: What did Eärendil say to Elwing before he went up alone into the land and came into the Calacirya?
-Answer:
-
-Eärendil said to Elwing: 'Await me here; for one only may bring the message that it is my fate to bear.' (Source: The PDF provided by the user)
+You: What did Eärendil say to Elwing before he went up alone into the land and came into the Calacirya?
+Jarvis: Eärendil said to Elwing: 'Await me here; for one only may bring the message that it is my fate to bear.' (Source: The PDF provided by the user)
 ```
 ... which is correct!
