@@ -8,27 +8,34 @@ Idea is to extend this functionality to be used for any document that can be tok
 
 Could (in theory) be used by students to use an LLM to ask questions about subject material. Or just to be able to brainstorm with a document as context.
 
-Web UI can be added as a front to upload any document. Creating an instance of LanceDB with all the chunks from the doc is the main bottle-neck - for my local system, it took about 4-5 minutes everytime just for this operation. Once the backend has been modularised and some API endpoints have been written to do these operations, the UI should be trivial. 
+Web UI can be added as a front to upload any document. Creating an instance of LanceDB with all the chunks from the doc is the main bottle-neck - for my local system, it took about 4-5 minutes everytime just for this operation. Once the backend has been modularised and some API endpoints have been written to do these operations, the UI should be trivial.
 
 ## How to run
+
 #### Upgrade pip in the virtual environment
+
 ```
 pip install --upgrade pip
 ```
 
 #### Install required dependencies
+
 ```
-pip3 install lancedb langchain langchain_community prettytable sentence-transformers huggingface-hub bs4 pypdf pandas langchain_huggingface
+pip3 install -r requirements.txt
 ```
 
 #### Place PDFs in `/data` folder
+
 #### Run `main.py`
+
 ```
 python main.py
 ```
 
 ## Sample output
+
 This is when data/ is added with the Silmarillion by JRR Tolkien
+
 ```text
 You are a helpful AI assistant. Your name is Jarvis
 
@@ -42,4 +49,5 @@ Answer:
 
 Eärendil said to Elwing: 'Await me here; for one only may bring the message that it is my fate to bear.' (Source: The PDF provided by the user)
 ```
+
 ... which is correct!
