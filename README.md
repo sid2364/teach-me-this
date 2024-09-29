@@ -18,7 +18,7 @@ pip install --upgrade pip
 
 #### Install required dependencies
 ```
-pip3 install lancedb langchain langchain_community prettytable sentence-transformers huggingface-hub bs4 pypdf pandas langchain_huggingface
+pip3 install -r requirements.txt
 ```
 
 #### Place PDFs in `/data` folder
