@@ -12,6 +12,9 @@ load_dotenv()
 prompt_template = """
 You are a helpful AI assistant. Your name is Jarvis
 
+Chat history with user: 
+{history}
+
 Use the following information fetched from the PDF files provided by the user to answer the question:
 {context}
 
@@ -20,9 +23,8 @@ Jarvis' Answer:
 """
 
 # Model architecture
-llm_repo_id = "huggingfaceh4/zephyr-7b-alpha"
+llm_repo_id = "HuggingFaceH4/zephyr-7b-beta"
 model_kwargs = {"add_to_git_credential": True}
-
 
 class AnswerParser(StrOutputParser):
     def parse(self, output):
@@ -37,22 +39,27 @@ class Chatbot:
         self.model = model
         self.prompt = prompt
         self.context = ""
+        self.history = []
 
     def ask_question(self, user_query):
         docs = self.retriever.invoke(user_query)
-        self.context = "\n".join([doc.page_content for doc in docs])
+        self.context = '\n'.join([doc.page_content for doc in docs])
 
         rag_chain_model = (
             self.retriever  # get relevant document chunks from the PDFs we read
             | (
-                lambda docs: {"context": self.context, "query": user_query}
+                lambda docs: {"history": '\n'.join(self.history), "context": self.context, "query": user_query}
             )  # Combine context and query
-            | self.prompt  # format the prompt with the context and query
-            | self.model  # fet the model response
+            | self.prompt  # format the prompt with the context and query (and history)
+            | self.model  # get the model response
             | StrOutputParser()  # parse the model response and make it 'pretty'?
         )
 
         response = rag_chain_model.invoke(user_query)
+
+        self.history.append(f"Question: {user_query}")
+        self.history.append(f"Answer: {response}")
+
         return response, self.context
 
 
@@ -60,7 +67,7 @@ def main():
     docsearch = create_new_db_or_read_existing()
     # print("Got LanceDB instance from utils: ", docsearch)
 
-    retriever = docsearch.as_retriever(search_kwargs={"k": 8})
+    retriever = docsearch.as_retriever(search_kwargs={"k": 5})
     # my_query = "What is the name of the pony that Sam Gamgee acquires in Bree after Bill Ferny sells them Bill the Pony?"
     my_query = "What did Eärendil say to Elwing before he went up alone into the land and came into the Calacirya?"
 
@@ -72,7 +79,7 @@ def main():
     )
 
     prompt = PromptTemplate(
-        input_variables=["context", "query"], template=prompt_template
+        input_variables=["context", "history",  "query"], template=prompt_template
     )
 
     chatbot = Chatbot(retriever, model, prompt)
