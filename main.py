@@ -1,5 +1,3 @@
-import os
-
 from dotenv import load_dotenv
 from langchain.prompts.prompt import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
@@ -32,6 +30,16 @@ class AnswerParser(StrOutputParser):
             return output.split("Jarvis' Answer:")[1].strip()
         return output
 
+class History:
+    def __init__(self):
+        self.history = []
+
+    def add(self, text):
+        self.history.append(text)
+
+    def get_history(self):
+        # limit history to last 4 entries to avoid clutter (because Q&A); very naive way to do this of course
+        return "\n".join(self.history[-4:])
 
 class Chatbot:
     def __init__(self, retriever, model, prompt):
@@ -39,7 +47,7 @@ class Chatbot:
         self.model = model
         self.prompt = prompt
         self.context = ""
-        self.history = []
+        self.history = History()
 
     def ask_question(self, user_query):
         docs = self.retriever.invoke(user_query)
@@ -48,7 +56,7 @@ class Chatbot:
         rag_chain_model = (
             self.retriever  # get relevant document chunks from the PDFs we read
             | (
-                lambda docs: {"history": '\n'.join(self.history), "context": self.context, "query": user_query}
+                lambda docs: {"history": self.history.get_history(), "context": self.context, "query": user_query}
             )  # Combine context and query
             | self.prompt  # format the prompt with the context and query (and history)
             | self.model  # get the model response
@@ -57,8 +65,8 @@ class Chatbot:
 
         response = rag_chain_model.invoke(user_query)
 
-        self.history.append(f"Question: {user_query}")
-        self.history.append(f"Answer: {response}")
+        self.history.add(f"Question: {user_query}")
+        self.history.add(f"Answer: {response}")
 
         return response, self.context
 
